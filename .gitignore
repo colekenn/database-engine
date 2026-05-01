@@ -1,0 +1,12 @@
+build/
+cmake-build-*/
+*.db
+*.tmp
+*.user
+*.suo
+*.obj
+*.exe
+*.ilk
+*.pdb
+*.vcxproj*
+*.sln
