@@ -47,6 +47,7 @@ PageId PageManager::allocate_page(PageType type) {
 
 PageData PageManager::read_page(PageId page_id) {
     validate_page_id(page_id);
+    ++stats_.read_operations;
     PageData page{};
     file_.seekg(static_cast<std::streamoff>(page_id * kPageSize), std::ios::beg);
     if (!file_) {
@@ -63,6 +64,7 @@ void PageManager::write_page(PageId page_id, const PageData& data) {
     if (page_id >= metadata_.next_page_id && page_id != kMetadataPageId) {
         throw DbException("cannot write unallocated page " + std::to_string(page_id));
     }
+    ++stats_.write_operations;
     file_.seekp(static_cast<std::streamoff>(page_id * kPageSize), std::ios::beg);
     if (!file_) {
         throw IOError("failed to seek while writing page " + std::to_string(page_id));

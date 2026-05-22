@@ -14,6 +14,11 @@ struct DbMetadata {
     std::uint64_t key_count{0};
 };
 
+struct PageManagerStats {
+    std::uint64_t read_operations{0};
+    std::uint64_t write_operations{0};
+};
+
 class PageManager {
 public:
     PageManager(const std::filesystem::path& path, bool create);
@@ -25,6 +30,7 @@ public:
     [[nodiscard]] const std::filesystem::path& path() const { return path_; }
     [[nodiscard]] const DbMetadata& metadata() const { return metadata_; }
     [[nodiscard]] std::uint64_t page_count() const { return metadata_.next_page_id; }
+    [[nodiscard]] PageManagerStats io_stats() const { return stats_; }
 
     PageId allocate_page(PageType type);
     PageData read_page(PageId page_id);
@@ -47,6 +53,7 @@ private:
     bool create_;
     std::fstream file_;
     DbMetadata metadata_;
+    PageManagerStats stats_;
 };
 
 } // namespace minidb
