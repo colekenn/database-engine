@@ -9,6 +9,13 @@
 
 namespace minidb {
 
+struct BufferPoolStats {
+    std::size_t capacity{0};
+    std::size_t resident_pages{0};
+    std::uint64_t cache_hits{0};
+    std::uint64_t cache_misses{0};
+};
+
 class BufferPool;
 
 class PageHandle {
@@ -54,6 +61,7 @@ public:
     [[nodiscard]] std::size_t capacity() const { return frames_.size(); }
     [[nodiscard]] std::size_t resident_pages() const { return page_table_.size(); }
     [[nodiscard]] bool contains(PageId page_id) const { return page_table_.contains(page_id); }
+    [[nodiscard]] BufferPoolStats stats() const;
 
 private:
     friend class PageHandle;
@@ -79,6 +87,8 @@ private:
     std::vector<Frame> frames_;
     std::unordered_map<PageId, std::size_t> page_table_;
     std::uint64_t clock_{0};
+    std::uint64_t cache_hits_{0};
+    std::uint64_t cache_misses_{0};
 };
 
 } // namespace minidb

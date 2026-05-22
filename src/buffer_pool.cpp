@@ -75,12 +75,14 @@ BufferPool::~BufferPool() {
 
 PageHandle BufferPool::fetch_page(PageId page_id) {
     if (auto it = page_table_.find(page_id); it != page_table_.end()) {
+        ++cache_hits_;
         Frame& frame = frames_[it->second];
         ++frame.pin_count;
         frame.last_used = ++clock_;
         return PageHandle(this, it->second, page_id);
     }
 
+    ++cache_misses_;
     std::size_t frame_index = acquire_frame();
     Frame& frame = frames_[frame_index];
     frame.page_id = page_id;
@@ -121,6 +123,15 @@ void BufferPool::flush_all() {
         write_back(index);
     }
     page_manager_.flush();
+}
+
+BufferPoolStats BufferPool::stats() const {
+    BufferPoolStats result;
+    result.capacity = frames_.size();
+    result.resident_pages = page_table_.size();
+    result.cache_hits = cache_hits_;
+    result.cache_misses = cache_misses_;
+    return result;
 }
 
 PageData& BufferPool::frame_data(std::size_t frame_index) {
