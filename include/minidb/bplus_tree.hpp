@@ -14,6 +14,24 @@ namespace minidb {
 
 class BPlusTree {
 public:
+    struct TreeNodeSnapshot {
+        bool leaf{true};
+        PageId page_id{kInvalidPageId};
+        PageId parent{kInvalidPageId};
+        PageId next_leaf{kInvalidPageId};
+        PageId prev_leaf{kInvalidPageId};
+        std::vector<std::string> keys;
+        std::vector<PageId> children;
+        std::size_t used_bytes{0};
+    };
+
+    struct TreeSnapshot {
+        PageId root_page_id{kInvalidPageId};
+        std::size_t height{0};
+        std::vector<TreeNodeSnapshot> nodes;
+        std::vector<PageId> search_path;
+    };
+
     BPlusTree(PageManager& page_manager, BufferPool& buffer_pool, OverflowManager& overflow_manager);
 
     bool put(const std::string& key, std::string value);
@@ -24,6 +42,7 @@ public:
         const std::optional<std::string>& start_key = std::nullopt,
         const std::optional<std::string>& end_key = std::nullopt,
         std::size_t limit = static_cast<std::size_t>(-1));
+    [[nodiscard]] TreeSnapshot snapshot(const std::optional<std::string>& search_key = std::nullopt);
 
 private:
     struct Node {

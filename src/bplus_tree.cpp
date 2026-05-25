@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <limits>
 #include <sstream>
+#include <unordered_set>
 
 namespace minidb {
 namespace {
@@ -131,6 +132,68 @@ std::vector<std::pair<std::string, std::string>> BPlusTree::scan(
         }
         page_id = leaf.next_leaf;
     }
+    return result;
+}
+
+BPlusTree::TreeSnapshot BPlusTree::snapshot(const std::optional<std::string>& search_key) {
+    if (search_key) {
+        require_valid_key(*search_key);
+    }
+    ensure_root();
+
+    TreeSnapshot result;
+    result.root_page_id = page_manager_.metadata().root_page_id;
+    if (result.root_page_id == kInvalidPageId) {
+        return result;
+    }
+
+    std::vector<std::pair<PageId, std::size_t>> pending{{result.root_page_id, 1}};
+    std::unordered_set<PageId> seen;
+    for (std::size_t index = 0; index < pending.size(); ++index) {
+        const auto [page_id, level] = pending[index];
+        if (!seen.insert(page_id).second) {
+            continue;
+        }
+
+        Node node = read_node(page_id);
+        TreeNodeSnapshot snapshot_node;
+        snapshot_node.leaf = node.leaf;
+        snapshot_node.page_id = node.page_id;
+        snapshot_node.parent = node.parent;
+        snapshot_node.next_leaf = node.next_leaf;
+        snapshot_node.prev_leaf = node.prev_leaf;
+        snapshot_node.keys = node.keys;
+        snapshot_node.children = node.children;
+        snapshot_node.used_bytes = node_size(node);
+
+        result.height = std::max(result.height, level);
+        if (!node.leaf) {
+            for (PageId child : node.children) {
+                if (child != kInvalidPageId) {
+                    pending.emplace_back(child, level + 1);
+                }
+            }
+        }
+        result.nodes.push_back(std::move(snapshot_node));
+    }
+
+    if (search_key) {
+        std::unordered_set<PageId> path_seen;
+        PageId page_id = result.root_page_id;
+        while (page_id != kInvalidPageId && path_seen.insert(page_id).second) {
+            result.search_path.push_back(page_id);
+            Node node = read_node(page_id);
+            if (node.leaf) {
+                break;
+            }
+            const std::size_t child_index = upper_bound_index(node.keys, *search_key);
+            if (child_index >= node.children.size()) {
+                throw CorruptionError("internal node child index is invalid");
+            }
+            page_id = node.children[child_index];
+        }
+    }
+
     return result;
 }
 
