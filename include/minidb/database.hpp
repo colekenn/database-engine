@@ -13,6 +13,29 @@
 
 namespace minidb {
 
+struct DatabaseStats {
+    std::uint64_t total_records{0};
+    std::uint64_t database_size_bytes{0};
+    std::uint64_t page_size_bytes{0};
+    std::uint64_t page_count{0};
+    std::uint64_t metadata_pages{0};
+    std::uint64_t internal_pages{0};
+    std::uint64_t leaf_pages{0};
+    std::uint64_t overflow_pages{0};
+    std::uint64_t tree_height{0};
+    std::uint64_t tree_used_bytes{0};
+    std::uint64_t tree_allocated_bytes{0};
+    double page_utilization{0.0};
+    std::size_t buffer_capacity{0};
+    std::size_t buffer_resident_pages{0};
+    std::uint64_t cache_hits{0};
+    std::uint64_t cache_misses{0};
+    double cache_hit_rate{0.0};
+    double cache_miss_rate{0.0};
+    std::uint64_t read_operations{0};
+    std::uint64_t write_operations{0};
+};
+
 class KVDatabase {
 public:
     static KVDatabase create(const std::filesystem::path& path, std::size_t buffer_pages = 64);
@@ -33,6 +56,9 @@ public:
         std::size_t limit = static_cast<std::size_t>(-1));
 
     [[nodiscard]] std::uint64_t size() const;
+    [[nodiscard]] DatabaseStats stats();
+    [[nodiscard]] BPlusTree::TreeSnapshot tree_snapshot(
+        const std::optional<std::string>& search_key = std::nullopt);
     void flush();
 
 private:
