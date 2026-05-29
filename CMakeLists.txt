@@ -32,5 +32,11 @@ target_link_libraries(minidb_cli PRIVATE minidb)
 add_executable(minidb_bench bench/bench.cpp)
 target_link_libraries(minidb_bench PRIVATE minidb)
 
+add_executable(minidb_server src/api_server.cpp)
+target_link_libraries(minidb_server PRIVATE minidb)
+if(WIN32)
+    target_link_libraries(minidb_server PRIVATE ws2_32)
+endif()
+
 enable_testing()
 add_test(NAME minidb_tests COMMAND minidb_tests)
