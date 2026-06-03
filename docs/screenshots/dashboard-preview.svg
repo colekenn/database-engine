@@ -1,0 +1,74 @@
+<svg width="1280" height="760" viewBox="0 0 1280 760" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1280" height="760" fill="#080A0F"/>
+  <rect x="0" y="0" width="250" height="760" fill="#10141D"/>
+  <rect x="26" y="28" width="40" height="40" rx="6" fill="#2DD4BF" fill-opacity="0.12"/>
+  <text x="82" y="44" fill="#F8FAFC" font-family="Inter, Arial" font-size="16" font-weight="700">MiniDB</text>
+  <text x="82" y="64" fill="#64748B" font-family="Inter, Arial" font-size="12">Storage engine console</text>
+  <g fill="#94A3B8" font-family="Inter, Arial" font-size="14">
+    <text x="34" y="138">Dashboard</text>
+    <text x="34" y="188">Records</text>
+    <text x="34" y="238">Range</text>
+    <text x="34" y="288">B+ Tree</text>
+    <text x="34" y="338">Metrics</text>
+  </g>
+  <rect x="20" y="112" width="210" height="38" rx="6" fill="#38BDF8" fill-opacity="0.10" stroke="#38BDF8" stroke-opacity="0.25"/>
+  <rect x="250" y="0" width="1030" height="82" fill="#080A0F" stroke="#263244"/>
+  <text x="292" y="32" fill="#64748B" font-family="Inter, Arial" font-size="12" font-weight="700" letter-spacing="2">CUSTOM C++ DATABASE ENGINE</text>
+  <text x="292" y="61" fill="#F8FAFC" font-family="Inter, Arial" font-size="26" font-weight="700">MiniDB Dashboard</text>
+  <g transform="translate(292 120)">
+    <rect width="214" height="128" rx="8" fill="#10141D" stroke="#263244"/>
+    <text x="18" y="34" fill="#64748B" font-family="Inter, Arial" font-size="12" font-weight="700">TOTAL RECORDS</text>
+    <text x="18" y="78" fill="#F8FAFC" font-family="Inter, Arial" font-size="34" font-weight="700">2,400</text>
+    <text x="18" y="106" fill="#94A3B8" font-family="Inter, Arial" font-size="13">Indexed key-value pairs</text>
+  </g>
+  <g transform="translate(530 120)">
+    <rect width="214" height="128" rx="8" fill="#10141D" stroke="#263244"/>
+    <text x="18" y="34" fill="#64748B" font-family="Inter, Arial" font-size="12" font-weight="700">DATABASE SIZE</text>
+    <text x="18" y="78" fill="#F8FAFC" font-family="Inter, Arial" font-size="34" font-weight="700">1.2 MB</text>
+    <text x="18" y="106" fill="#94A3B8" font-family="Inter, Arial" font-size="13">302 pages</text>
+  </g>
+  <g transform="translate(768 120)">
+    <rect width="214" height="128" rx="8" fill="#10141D" stroke="#263244"/>
+    <text x="18" y="34" fill="#64748B" font-family="Inter, Arial" font-size="12" font-weight="700">TREE HEIGHT</text>
+    <text x="18" y="78" fill="#F8FAFC" font-family="Inter, Arial" font-size="34" font-weight="700">3</text>
+    <text x="18" y="106" fill="#94A3B8" font-family="Inter, Arial" font-size="13">4 internal / 28 leaf</text>
+  </g>
+  <g transform="translate(1006 120)">
+    <rect width="214" height="128" rx="8" fill="#10141D" stroke="#263244"/>
+    <text x="18" y="34" fill="#64748B" font-family="Inter, Arial" font-size="12" font-weight="700">CACHE HIT RATE</text>
+    <text x="18" y="78" fill="#F8FAFC" font-family="Inter, Arial" font-size="34" font-weight="700">92.4%</text>
+    <text x="18" y="106" fill="#94A3B8" font-family="Inter, Arial" font-size="13">Runtime buffer cache</text>
+  </g>
+  <rect x="292" y="292" width="928" height="182" rx="8" fill="#10141D" stroke="#263244"/>
+  <text x="316" y="334" fill="#F8FAFC" font-family="Inter, Arial" font-size="20" font-weight="700">Allocated storage</text>
+  <g transform="translate(316 364)">
+    <rect width="194" height="78" rx="6" fill="#080A0F" stroke="#263244"/>
+    <circle cx="22" cy="24" r="5" fill="#94A3B8"/>
+    <text x="38" y="29" fill="#94A3B8" font-family="Inter, Arial" font-size="13">Metadata</text>
+    <text x="18" y="61" fill="#F8FAFC" font-family="Inter, Arial" font-size="24" font-weight="700">1</text>
+  </g>
+  <g transform="translate(536 364)">
+    <rect width="194" height="78" rx="6" fill="#080A0F" stroke="#263244"/>
+    <circle cx="22" cy="24" r="5" fill="#38BDF8"/>
+    <text x="38" y="29" fill="#94A3B8" font-family="Inter, Arial" font-size="13">Internal</text>
+    <text x="18" y="61" fill="#F8FAFC" font-family="Inter, Arial" font-size="24" font-weight="700">4</text>
+  </g>
+  <g transform="translate(756 364)">
+    <rect width="194" height="78" rx="6" fill="#080A0F" stroke="#263244"/>
+    <circle cx="22" cy="24" r="5" fill="#2DD4BF"/>
+    <text x="38" y="29" fill="#94A3B8" font-family="Inter, Arial" font-size="13">Leaf</text>
+    <text x="18" y="61" fill="#F8FAFC" font-family="Inter, Arial" font-size="24" font-weight="700">28</text>
+  </g>
+  <g transform="translate(976 364)">
+    <rect width="194" height="78" rx="6" fill="#080A0F" stroke="#263244"/>
+    <circle cx="22" cy="24" r="5" fill="#F59E0B"/>
+    <text x="38" y="29" fill="#94A3B8" font-family="Inter, Arial" font-size="13">Overflow</text>
+    <text x="18" y="61" fill="#F8FAFC" font-family="Inter, Arial" font-size="24" font-weight="700">12</text>
+  </g>
+  <rect x="292" y="512" width="928" height="164" rx="8" fill="#10141D" stroke="#263244"/>
+  <text x="316" y="552" fill="#F8FAFC" font-family="Inter, Arial" font-size="20" font-weight="700">Record Explorer</text>
+  <rect x="316" y="580" width="236" height="44" rx="6" fill="#080A0F" stroke="#263244"/>
+  <rect x="570" y="580" width="372" height="44" rx="6" fill="#080A0F" stroke="#263244"/>
+  <rect x="960" y="580" width="120" height="44" rx="6" fill="#2DD4BF"/>
+  <text x="1000" y="608" fill="#080A0F" font-family="Inter, Arial" font-size="14" font-weight="700">Insert</text>
+</svg>

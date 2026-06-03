@@ -1,0 +1,43 @@
+<svg width="1280" height="760" viewBox="0 0 1280 760" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1280" height="760" fill="#080A0F"/>
+  <rect x="56" y="44" width="1168" height="96" rx="8" fill="#10141D" stroke="#263244"/>
+  <text x="84" y="82" fill="#64748B" font-family="Inter, Arial" font-size="12" font-weight="700" letter-spacing="2">GET /TREE</text>
+  <text x="84" y="115" fill="#F8FAFC" font-family="Inter, Arial" font-size="24" font-weight="700">B+ Tree Visualization</text>
+  <rect x="56" y="176" width="1168" height="520" rx="8" fill="#080A0F" stroke="#263244"/>
+  <path d="M640 306L376 452" stroke="#2DD4BF" stroke-width="3"/>
+  <path d="M640 306L640 452" stroke="#334155" stroke-width="2"/>
+  <path d="M640 306L904 452" stroke="#334155" stroke-width="2"/>
+  <rect x="494" y="224" width="292" height="104" rx="8" fill="#151B26" stroke="#F59E0B"/>
+  <text x="518" y="256" fill="#F59E0B" font-family="Inter, Arial" font-size="12" font-weight="700">INTERNAL</text>
+  <text x="724" y="256" fill="#64748B" font-family="JetBrains Mono, monospace" font-size="12">p9</text>
+  <rect x="518" y="276" width="72" height="26" rx="4" fill="#080A0F"/>
+  <text x="534" y="294" fill="#E2E8F0" font-family="JetBrains Mono, monospace" font-size="12">key-20</text>
+  <rect x="602" y="276" width="72" height="26" rx="4" fill="#080A0F"/>
+  <text x="618" y="294" fill="#E2E8F0" font-family="JetBrains Mono, monospace" font-size="12">key-50</text>
+  <rect x="686" y="276" width="72" height="26" rx="4" fill="#080A0F"/>
+  <text x="702" y="294" fill="#E2E8F0" font-family="JetBrains Mono, monospace" font-size="12">key-80</text>
+  <rect x="230" y="452" width="292" height="118" rx="8" fill="#10141D" stroke="#2DD4BF"/>
+  <text x="254" y="486" fill="#38BDF8" font-family="Inter, Arial" font-size="12" font-weight="700">LEAF</text>
+  <text x="462" y="486" fill="#64748B" font-family="JetBrains Mono, monospace" font-size="12">p3</text>
+  <rect x="254" y="506" width="72" height="26" rx="4" fill="#080A0F"/>
+  <text x="270" y="524" fill="#E2E8F0" font-family="JetBrains Mono, monospace" font-size="12">key-01</text>
+  <rect x="338" y="506" width="72" height="26" rx="4" fill="#080A0F"/>
+  <text x="354" y="524" fill="#E2E8F0" font-family="JetBrains Mono, monospace" font-size="12">key-12</text>
+  <text x="254" y="552" fill="#64748B" font-family="Inter, Arial" font-size="12">248 B used</text>
+  <rect x="494" y="452" width="292" height="118" rx="8" fill="#10141D" stroke="#38BDF8" stroke-opacity="0.35"/>
+  <text x="518" y="486" fill="#38BDF8" font-family="Inter, Arial" font-size="12" font-weight="700">LEAF</text>
+  <text x="726" y="486" fill="#64748B" font-family="JetBrains Mono, monospace" font-size="12">p6</text>
+  <rect x="518" y="506" width="72" height="26" rx="4" fill="#080A0F"/>
+  <text x="534" y="524" fill="#E2E8F0" font-family="JetBrains Mono, monospace" font-size="12">key-24</text>
+  <rect x="602" y="506" width="72" height="26" rx="4" fill="#080A0F"/>
+  <text x="618" y="524" fill="#E2E8F0" font-family="JetBrains Mono, monospace" font-size="12">key-44</text>
+  <text x="518" y="552" fill="#64748B" font-family="Inter, Arial" font-size="12">312 B used</text>
+  <rect x="758" y="452" width="292" height="118" rx="8" fill="#10141D" stroke="#38BDF8" stroke-opacity="0.35"/>
+  <text x="782" y="486" fill="#38BDF8" font-family="Inter, Arial" font-size="12" font-weight="700">LEAF</text>
+  <text x="990" y="486" fill="#64748B" font-family="JetBrains Mono, monospace" font-size="12">p8</text>
+  <rect x="782" y="506" width="72" height="26" rx="4" fill="#080A0F"/>
+  <text x="798" y="524" fill="#E2E8F0" font-family="JetBrains Mono, monospace" font-size="12">key-72</text>
+  <rect x="866" y="506" width="72" height="26" rx="4" fill="#080A0F"/>
+  <text x="882" y="524" fill="#E2E8F0" font-family="JetBrains Mono, monospace" font-size="12">key-91</text>
+  <text x="782" y="552" fill="#64748B" font-family="Inter, Arial" font-size="12">296 B used</text>
+</svg>
