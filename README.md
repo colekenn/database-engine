@@ -1,8 +1,6 @@
 # database-engine
 
-A key-value database engine I built to learn how databases actually work under the hood. I got tired of just using databases without knowing what they were doing, so I wrote one.
-
-It stores key-value pairs on disk using a B+ tree, which means range scans are fast because the leaf nodes are linked together. Reads and writes go through a buffer pool that keeps hot pages in memory so you're not hitting disk constantly.
+This database engine stores key-value pairs on disk using a B+ tree, which means range scans are fast because the leaf nodes are linked together. Reads and writes go through a buffer pool that keeps hot pages in memory so you're not hitting disk constantly.
 
 ## what's in here
 
