@@ -1,5 +1,7 @@
 # database-engine
 
+**[try it live](https://database-engine.vercel.app/)** — the backend sleeps when idle, so give it a minute to wake up
+
 A small database written from scratch in C++. It stores key-value pairs in a single file and uses a B+ tree to find any key fast without scanning the whole file.
 
 There's a web dashboard that shows the tree live — you can insert keys and watch pages fill up and split.
