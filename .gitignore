@@ -2,6 +2,9 @@ build/
 cmake-build-*/
 dashboard/dist/
 dashboard/node_modules/
+dashboard/vite.config.js
+dashboard/vite.config.d.ts
+*.tsbuildinfo
 *.local
 .env
 .env.*

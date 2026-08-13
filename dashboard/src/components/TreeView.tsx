@@ -1,30 +1,17 @@
-import { FormEvent, useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Background, Controls, ReactFlow, type Edge, type Node } from '@xyflow/react';
-import { Search } from 'lucide-react';
 import { api } from '../api/client';
-import { Button } from '../components/Button';
-import { Field } from '../components/Input';
-import { Panel } from '../components/Panel';
-import { EmptyBlock, LoadingBlock } from '../components/StatusBlock';
-import { useToast } from '../components/ToastProvider';
 import type { TreeNode, TreeSnapshot } from '../types';
 import { formatBytes } from '../lib/format';
 
-type TreePageProps = {
+type TreeViewProps = {
   refreshToken: number;
+  tracedKey: string | null;
 };
 
 type FlowData = {
   label: ReactNode;
 };
-
-// leaf = blue, internal = orange, search path = violet — same identity
-// colors as the overview and metrics pages.
-const legend = [
-  { color: 'bg-leaf', label: 'Leaf page', blurb: 'holds the actual key-value data' },
-  { color: 'bg-internal', label: 'Internal page', blurb: 'routes lookups toward the right leaf' },
-  { color: 'bg-path', label: 'Search path', blurb: 'pages visited to find your key' },
-];
 
 // Cap the key chips per node so a full leaf doesn't render as a giant tower.
 const MAX_KEYS_SHOWN = 10;
@@ -32,7 +19,7 @@ const MAX_KEYS_SHOWN = 10;
 function nodeLabel(node: TreeNode, highlighted: boolean) {
   return (
     <div
-      className={`min-w-52 max-w-64 rounded-md border-2 bg-white px-3 py-3 text-left shadow-card ${
+      className={`min-w-52 max-w-64 rounded-md border-2 bg-white px-3 py-3 text-left ${
         highlighted ? 'border-path' : node.type === 'leaf' ? 'border-leaf/50' : 'border-internal/50'
       }`}
     >
@@ -129,82 +116,60 @@ function buildFlow(snapshot: TreeSnapshot): { nodes: Node<FlowData>[]; edges: Ed
   return { nodes, edges };
 }
 
-export function TreePage({ refreshToken }: TreePageProps) {
-  const { push } = useToast();
+export function TreeView({ refreshToken, tracedKey }: TreeViewProps) {
   const [tree, setTree] = useState<TreeSnapshot | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [searchKey, setSearchKey] = useState('');
-  const [submittedKey, setSubmittedKey] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
   const loadTree = useCallback(async () => {
     try {
-      const snapshot = await api.tree(submittedKey.trim() || undefined);
+      const snapshot = await api.tree(tracedKey ?? undefined);
       setTree(snapshot);
+      setError(null);
     } catch (err) {
-      push({ title: 'Tree snapshot failed', message: err instanceof Error ? err.message : 'Request failed', variant: 'error' });
-    } finally {
-      setLoading(false);
+      setError(err instanceof Error ? err.message : 'request failed');
     }
-  }, [push, submittedKey]);
+  }, [tracedKey]);
 
   useEffect(() => {
-    setLoading(true);
     void loadTree();
-  }, [loadTree, refreshToken]);
-
-  useEffect(() => {
     const id = window.setInterval(() => {
       void loadTree();
     }, 4000);
     return () => window.clearInterval(id);
-  }, [loadTree]);
+  }, [loadTree, refreshToken]);
 
   const flow = useMemo(() => (tree ? buildFlow(tree) : { nodes: [], edges: [] }), [tree]);
 
-  function submit(event: FormEvent) {
-    event.preventDefault();
-    setSubmittedKey(searchKey);
-  }
-
   return (
-    <div className="grid gap-6">
-      <Panel
-        title="Live tree structure"
-        description="Each box is a real 4 KB page from the database file. Drag to pan, scroll to zoom — the view refreshes every few seconds."
-        action={
-          <form className="flex flex-col gap-2 sm:flex-row sm:items-end" onSubmit={submit}>
-            <Field label="Find a key" placeholder="e.g. user:0142" value={searchKey} onChange={(event) => setSearchKey(event.target.value)} />
-            <Button variant="primary" icon={<Search className="h-4 w-4" />}>
-              Trace lookup
-            </Button>
-          </form>
-        }
-      >
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-          {legend.map((item) => (
-            <div key={item.label} className="flex items-center gap-2 text-sm">
-              <span className={`h-2.5 w-2.5 rounded-full ${item.color}`} />
-              <span className="font-medium text-ink">{item.label}</span>
-              <span className="text-muted">— {item.blurb}</span>
-            </div>
-          ))}
-        </div>
-      </Panel>
+    <div className="grid min-h-[520px] grid-rows-[auto_1fr] gap-3">
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-ink2">
+        <span className="flex items-center gap-1.5">
+          <span className="h-2 w-2 rounded-full bg-leaf" /> leaf — holds data
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="h-2 w-2 rounded-full bg-internal" /> internal — routes lookups
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="h-2 w-2 rounded-full bg-path" /> search path
+        </span>
+        {tracedKey ? <span className="font-mono text-xs text-path">tracing “{tracedKey}”</span> : null}
+      </div>
 
-      {loading && !tree ? (
-        <LoadingBlock title="Loading tree" />
+      {error ? (
+        <div className="grid place-items-center rounded-md border border-line bg-surface text-sm text-danger">{error}</div>
       ) : !tree || tree.nodes.length === 0 ? (
-        <EmptyBlock
-          title="The tree is empty"
-          message="Click “Load sample data” in the header (or insert keys on the Records page) and watch pages appear and split here."
-        />
+        <div className="grid place-items-center rounded-md border border-dashed border-baseline bg-surface text-center">
+          <p className="max-w-sm p-6 text-sm text-ink2">
+            empty tree — insert a key or load the sample data to see pages appear and split
+          </p>
+        </div>
       ) : (
-        <section className="h-[640px] overflow-hidden rounded-lg border border-line bg-surface shadow-card">
+        <div className="overflow-hidden rounded-md border border-line bg-surface">
           <ReactFlow nodes={flow.nodes} edges={flow.edges} fitView minZoom={0.25} maxZoom={1.4} proOptions={{ hideAttribution: true }}>
             <Background color="#e1e0d9" gap={24} />
             <Controls />
           </ReactFlow>
-        </section>
+        </div>
       )}
     </div>
   );

@@ -13,7 +13,7 @@ export function Field({ label, className = '', ...props }: FieldProps) {
     <label className="grid gap-2 text-sm text-ink2">
       <span className="font-medium">{label}</span>
       <input
-        className={`h-11 rounded-md border border-line bg-white px-3 text-ink outline-none transition placeholder:text-muted focus:border-leaf focus:ring-2 focus:ring-leaf/20 ${className}`}
+        className={`h-11 w-full min-w-0 rounded-md border border-line bg-white px-3 text-ink outline-none transition placeholder:text-muted focus:border-leaf focus:ring-2 focus:ring-leaf/20 ${className}`}
         {...props}
       />
     </label>
