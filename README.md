@@ -28,5 +28,5 @@ cd dashboard && npm install && npm run dev
 ```
 
 ## why
-
+ 
 I wanted to understand buffer pools, page-based storage, and tree rebalancing at a level where I actually had to implement them. Reading about it only goes so far.
