@@ -100,13 +100,7 @@ export function App() {
     <div className="min-h-screen bg-paper text-ink">
       <header className="border-b border-line bg-surface">
         <div className="mx-auto flex max-w-[1400px] flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6">
-          <div>
-            <h1 className="text-lg font-semibold">B+ tree database engine</h1>
-            <p className="mt-0.5 text-sm text-ink2">
-              a key-value database written from scratch in C++ — page-based storage, buffer pool caching, and a persistent B+ tree
-              index, visualized live below
-            </p>
-          </div>
+          <h1 className="text-lg font-semibold">B+ tree database engine</h1>
           <div className="flex flex-wrap items-center gap-3">
             <span className="flex items-center gap-2 text-sm text-ink2">
               <span className={`h-2 w-2 rounded-full ${health?.status === 'ok' ? 'bg-good' : 'bg-danger'}`} />
