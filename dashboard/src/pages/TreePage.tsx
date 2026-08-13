@@ -1,5 +1,5 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { Background, Controls, MiniMap, ReactFlow, type Edge, type Node } from '@xyflow/react';
+import { Background, Controls, ReactFlow, type Edge, type Node } from '@xyflow/react';
 import { Search } from 'lucide-react';
 import { api } from '../api/client';
 import { Button } from '../components/Button';
@@ -18,31 +18,48 @@ type FlowData = {
   label: ReactNode;
 };
 
+// leaf = blue, internal = orange, search path = violet — same identity
+// colors as the overview and metrics pages.
+const legend = [
+  { color: 'bg-leaf', label: 'Leaf page', blurb: 'holds the actual key-value data' },
+  { color: 'bg-internal', label: 'Internal page', blurb: 'routes lookups toward the right leaf' },
+  { color: 'bg-path', label: 'Search path', blurb: 'pages visited to find your key' },
+];
+
+// Cap the key chips per node so a full leaf doesn't render as a giant tower.
+const MAX_KEYS_SHOWN = 10;
+
 function nodeLabel(node: TreeNode, highlighted: boolean) {
   return (
     <div
-      className={`min-w-52 max-w-64 rounded-md border px-3 py-3 text-left shadow-panel ${
-        highlighted ? 'border-mint bg-mint/10' : node.type === 'leaf' ? 'border-skyline/30 bg-panel' : 'border-amberline/30 bg-panel2'
+      className={`min-w-52 max-w-64 rounded-md border-2 bg-white px-3 py-3 text-left shadow-card ${
+        highlighted ? 'border-path' : node.type === 'leaf' ? 'border-leaf/50' : 'border-internal/50'
       }`}
     >
       <div className="flex items-center justify-between gap-3">
-        <span className={`text-xs font-semibold uppercase tracking-[0.12em] ${node.type === 'leaf' ? 'text-skyline' : 'text-amberline'}`}>
+        <span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-ink2">
+          <span className={`h-2 w-2 rounded-full ${highlighted ? 'bg-path' : node.type === 'leaf' ? 'bg-leaf' : 'bg-internal'}`} />
           {node.type}
         </span>
-        <span className="font-mono text-xs text-slate-500">p{node.pageId}</span>
+        <span className="font-mono text-xs text-muted">page {node.pageId}</span>
       </div>
       <div className="mt-3 flex flex-wrap gap-1.5">
         {node.keys.length > 0 ? (
-          node.keys.map((key) => (
-            <span key={key} className="max-w-28 truncate rounded bg-ink px-2 py-1 font-mono text-xs text-slate-200">
-              {key}
-            </span>
-          ))
+          <>
+            {node.keys.slice(0, MAX_KEYS_SHOWN).map((key) => (
+              <span key={key} className="max-w-28 truncate rounded border border-line bg-paper px-2 py-1 font-mono text-xs text-ink">
+                {key}
+              </span>
+            ))}
+            {node.keys.length > MAX_KEYS_SHOWN ? (
+              <span className="rounded px-2 py-1 text-xs text-muted">+{node.keys.length - MAX_KEYS_SHOWN} more</span>
+            ) : null}
+          </>
         ) : (
-          <span className="text-xs text-slate-500">empty</span>
+          <span className="text-xs text-muted">empty</span>
         )}
       </div>
-      <p className="mt-3 text-xs text-slate-500">{formatBytes(node.usedBytes)} used</p>
+      <p className="mt-3 text-xs text-muted">{formatBytes(node.usedBytes)} of 4 KB used</p>
     </div>
   );
 }
@@ -94,16 +111,19 @@ function buildFlow(snapshot: TreeSnapshot): { nodes: Node<FlowData>[]; edges: Ed
   });
 
   const edges: Edge[] = snapshot.nodes.flatMap((node) =>
-    node.children.map((childId, index) => ({
-      id: `${node.pageId}-${childId}-${index}`,
-      source: String(node.pageId),
-      target: String(childId),
-      animated: highlighted.has(node.pageId) && highlighted.has(childId),
-      style: {
-        stroke: highlighted.has(node.pageId) && highlighted.has(childId) ? '#2dd4bf' : '#334155',
-        strokeWidth: highlighted.has(node.pageId) && highlighted.has(childId) ? 2.5 : 1.5,
-      },
-    })),
+    node.children.map((childId, index) => {
+      const onPath = highlighted.has(node.pageId) && highlighted.has(childId);
+      return {
+        id: `${node.pageId}-${childId}-${index}`,
+        source: String(node.pageId),
+        target: String(childId),
+        animated: onPath,
+        style: {
+          stroke: onPath ? '#4a3aa7' : '#c3c2b7',
+          strokeWidth: onPath ? 2.5 : 1.5,
+        },
+      };
+    }),
   );
 
   return { nodes, edges };
@@ -149,56 +169,43 @@ export function TreePage({ refreshToken }: TreePageProps) {
   return (
     <div className="grid gap-6">
       <Panel
-        title="B+ Tree Visualization"
-        eyebrow="GET /tree"
+        title="Live tree structure"
+        description="Each box is a real 4 KB page from the database file. Drag to pan, scroll to zoom — the view refreshes every few seconds."
         action={
           <form className="flex flex-col gap-2 sm:flex-row sm:items-end" onSubmit={submit}>
-            <Field label="Search path" value={searchKey} onChange={(event) => setSearchKey(event.target.value)} />
+            <Field label="Find a key" placeholder="e.g. user:0142" value={searchKey} onChange={(event) => setSearchKey(event.target.value)} />
             <Button variant="primary" icon={<Search className="h-4 w-4" />}>
-              Highlight
+              Trace lookup
             </Button>
           </form>
         }
       >
-        <div className="grid gap-3 text-sm text-slate-400 sm:grid-cols-3">
-          <div className="rounded-md border border-line bg-ink/40 p-3">
-            <span className="text-slate-500">Height</span>
-            <p className="mt-1 text-xl font-semibold text-slate-100">{tree?.height ?? 0}</p>
-          </div>
-          <div className="rounded-md border border-line bg-ink/40 p-3">
-            <span className="text-slate-500">Nodes</span>
-            <p className="mt-1 text-xl font-semibold text-slate-100">{tree?.nodes.length ?? 0}</p>
-          </div>
-          <div className="rounded-md border border-line bg-ink/40 p-3">
-            <span className="text-slate-500">Highlighted pages</span>
-            <p className="mt-1 text-xl font-semibold text-slate-100">{tree?.searchPath.length ?? 0}</p>
-          </div>
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+          {legend.map((item) => (
+            <div key={item.label} className="flex items-center gap-2 text-sm">
+              <span className={`h-2.5 w-2.5 rounded-full ${item.color}`} />
+              <span className="font-medium text-ink">{item.label}</span>
+              <span className="text-muted">— {item.blurb}</span>
+            </div>
+          ))}
         </div>
       </Panel>
 
       {loading && !tree ? (
         <LoadingBlock title="Loading tree" />
       ) : !tree || tree.nodes.length === 0 ? (
-        <EmptyBlock title="No tree pages found" />
+        <EmptyBlock
+          title="The tree is empty"
+          message="Click “Load sample data” in the header (or insert keys on the Records page) and watch pages appear and split here."
+        />
       ) : (
-        <section className="h-[640px] overflow-hidden rounded-lg border border-line bg-ink shadow-panel">
+        <section className="h-[640px] overflow-hidden rounded-lg border border-line bg-surface shadow-card">
           <ReactFlow nodes={flow.nodes} edges={flow.edges} fitView minZoom={0.25} maxZoom={1.4} proOptions={{ hideAttribution: true }}>
-            <Background color="#263244" gap={24} />
+            <Background color="#e1e0d9" gap={24} />
             <Controls />
-            <MiniMap
-              pannable
-              zoomable
-              nodeColor={(node) => {
-                const treeNode = tree.nodes.find((item) => String(item.pageId) === node.id);
-                if (!treeNode) return '#64748b';
-                if (tree.searchPath.includes(treeNode.pageId)) return '#2dd4bf';
-                return treeNode.type === 'leaf' ? '#38bdf8' : '#f59e0b';
-              }}
-            />
           </ReactFlow>
         </section>
       )}
-
     </div>
   );
 }

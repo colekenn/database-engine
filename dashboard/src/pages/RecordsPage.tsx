@@ -79,10 +79,14 @@ export function RecordsPage({ onChanged }: RecordsPageProps) {
   return (
     <div className="grid gap-6 xl:grid-cols-[1fr_380px]">
       <div className="grid gap-6">
-        <Panel title="Insert Record" eyebrow="POST /records">
+        <Panel
+          title="Insert a record"
+          eyebrow="POST /records"
+          description="The key lands in sorted position inside a leaf page. When a leaf fills up it splits in two — that's how the tree grows."
+        >
           <form className="grid gap-4" onSubmit={submitInsert}>
-            <Field label="Key" value={insertKey} onChange={(event) => setInsertKey(event.target.value)} required />
-            <TextArea label="Value" value={insertValue} onChange={(event) => setInsertValue(event.target.value)} />
+            <Field label="Key" placeholder="e.g. user:0500" value={insertKey} onChange={(event) => setInsertKey(event.target.value)} required />
+            <TextArea label="Value" placeholder="anything — long values spill into overflow pages" value={insertValue} onChange={(event) => setInsertValue(event.target.value)} />
             <Button variant="primary" disabled={busy === 'insert'} icon={<Plus className="h-4 w-4" />}>
               Insert
             </Button>
@@ -90,7 +94,7 @@ export function RecordsPage({ onChanged }: RecordsPageProps) {
         </Panel>
 
         <div className="grid gap-6 lg:grid-cols-3">
-          <Panel title="Search" eyebrow="GET /records/:key">
+          <Panel title="Search" eyebrow="GET /records/:key" description="Walks root → leaf, comparing keys at each level.">
             <form className="grid gap-4" onSubmit={submitSearch}>
               <Field label="Key" value={searchKey} onChange={(event) => setSearchKey(event.target.value)} required />
               <Button disabled={busy === 'search'} icon={<Search className="h-4 w-4" />}>
@@ -99,7 +103,7 @@ export function RecordsPage({ onChanged }: RecordsPageProps) {
             </form>
           </Panel>
 
-          <Panel title="Update" eyebrow="PUT /records/:key">
+          <Panel title="Update" eyebrow="PUT /records/:key" description="Finds the key and rewrites its value in place.">
             <form className="grid gap-4" onSubmit={submitUpdate}>
               <Field label="Key" value={updateKey} onChange={(event) => setUpdateKey(event.target.value)} required />
               <TextArea label="Value" value={updateValue} onChange={(event) => setUpdateValue(event.target.value)} />
@@ -109,7 +113,7 @@ export function RecordsPage({ onChanged }: RecordsPageProps) {
             </form>
           </Panel>
 
-          <Panel title="Delete" eyebrow="DELETE /records/:key">
+          <Panel title="Delete" eyebrow="DELETE /records/:key" description="Removes the key from its leaf page.">
             <form className="grid gap-4" onSubmit={submitDelete}>
               <Field label="Key" value={deleteKey} onChange={(event) => setDeleteKey(event.target.value)} required />
               <Button variant="danger" disabled={busy === 'delete'} icon={<Trash2 className="h-4 w-4" />}>
@@ -120,13 +124,15 @@ export function RecordsPage({ onChanged }: RecordsPageProps) {
         </div>
       </div>
 
-      <Panel title="Response" eyebrow="JSON">
+      <Panel title="Engine response" eyebrow="JSON" description="The raw reply from the C++ server for your last operation.">
         {result ? (
-          <pre className="max-h-[520px] overflow-auto rounded-md border border-line bg-ink p-4 text-sm leading-6 text-slate-200">
+          <pre className="max-h-[520px] overflow-auto rounded-md border border-line bg-paper p-4 text-sm leading-6 text-ink">
             {JSON.stringify(result, null, 2)}
           </pre>
         ) : (
-          <div className="rounded-md border border-line bg-ink/50 p-4 text-sm text-slate-500">No active record response</div>
+          <div className="rounded-md border border-dashed border-baseline bg-paper p-4 text-sm text-muted">
+            Run an operation and the response shows up here.
+          </div>
         )}
       </Panel>
     </div>

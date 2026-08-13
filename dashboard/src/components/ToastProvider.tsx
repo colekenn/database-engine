@@ -32,16 +32,16 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {children}
       <div className="fixed right-4 top-4 z-50 grid w-[min(360px,calc(100vw-2rem))] gap-3">
         {toasts.map((toast) => (
-          <div key={toast.id} className="rounded-lg border border-line bg-panel p-4 shadow-panel">
+          <div key={toast.id} className="rounded-lg border border-line bg-white p-4 shadow-card">
             <div className="flex gap-3">
               {toast.variant === 'success' ? (
-                <CheckCircle2 className="mt-0.5 h-5 w-5 text-mint" />
+                <CheckCircle2 className="mt-0.5 h-5 w-5 text-good" />
               ) : (
-                <XCircle className="mt-0.5 h-5 w-5 text-rose-300" />
+                <XCircle className="mt-0.5 h-5 w-5 text-danger" />
               )}
               <div className="min-w-0">
-                <p className="font-semibold text-slate-50">{toast.title}</p>
-                {toast.message ? <p className="mt-1 text-sm text-slate-400">{toast.message}</p> : null}
+                <p className="font-semibold text-ink">{toast.title}</p>
+                {toast.message ? <p className="mt-1 text-sm text-ink2">{toast.message}</p> : null}
               </div>
             </div>
           </div>

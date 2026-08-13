@@ -5,13 +5,14 @@
 @tailwind utilities;
 
 html {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 body {
   margin: 0;
   min-width: 320px;
-  background: #080a0f;
+  background: #f9f9f7;
+  color: #0b0b0b;
   font-family:
     Inter,
     ui-sans-serif,
@@ -32,6 +33,31 @@ textarea {
   font: inherit;
 }
 
+/* boot screen: nodes light up root -> leaves on a loop */
+@keyframes boot-pulse {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  35% {
+    opacity: 1;
+  }
+}
+
+.boot-node,
+.boot-edge {
+  animation: boot-pulse 2.4s ease-in-out infinite;
+  opacity: 0.25;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boot-node,
+  .boot-edge {
+    animation: none;
+    opacity: 1;
+  }
+}
+
 .react-flow__node-default {
   border: 0;
   padding: 0;
@@ -44,13 +70,17 @@ textarea {
 }
 
 .react-flow__controls-button {
-  background: #10141d;
-  border-color: #263244;
-  color: #e2e8f0;
+  background: #fcfcfb;
+  border-color: #e1e0d9;
+  color: #52514e;
+}
+
+.react-flow__controls-button:hover {
+  background: #f3f2ee;
 }
 
 .react-flow__minimap {
-  background: #10141d;
-  border: 1px solid #263244;
+  background: #fcfcfb;
+  border: 1px solid #e1e0d9;
   border-radius: 8px;
 }

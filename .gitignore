@@ -2,6 +2,9 @@ build/
 cmake-build-*/
 dashboard/dist/
 dashboard/node_modules/
+*.local
+.env
+.env.*
 *.db
 *.tmp
 *.user

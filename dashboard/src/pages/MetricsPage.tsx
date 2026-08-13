@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart, CartesianGrid, Cell, LabelList, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { api } from '../api/client';
 import { Panel } from '../components/Panel';
 import { EmptyBlock, LoadingBlock } from '../components/StatusBlock';
@@ -10,7 +10,26 @@ type MetricsPageProps = {
   refreshToken: number;
 };
 
-const chartColors = ['#2dd4bf', '#38bdf8', '#f59e0b', '#fb7185'];
+// Identity colors shared with the tree visualizer and overview page.
+const pageTypeColors: Record<string, string> = {
+  Leaf: '#2a78d6',
+  Internal: '#eb6834',
+  Metadata: '#1baf7a',
+  Overflow: '#eda100',
+};
+
+const tooltipStyle = { background: '#ffffff', border: '1px solid #e1e0d9', borderRadius: 8, color: '#0b0b0b' };
+
+function Meter({ ratio, label }: { ratio: number; label: string }) {
+  return (
+    <div>
+      <div className="h-3 overflow-hidden rounded-full bg-[#cde2fb]">
+        <div className="h-full rounded-full bg-leaf" style={{ width: `${Math.min(100, Math.max(0, ratio * 100))}%` }} />
+      </div>
+      <p className="mt-2 text-sm text-muted">{label}</p>
+    </div>
+  );
+}
 
 export function MetricsPage({ refreshToken }: MetricsPageProps) {
   const [stats, setStats] = useState<Stats | null>(null);
@@ -42,18 +61,15 @@ export function MetricsPage({ refreshToken }: MetricsPageProps) {
   const charts = useMemo(() => {
     if (!stats) return null;
     return {
-      cache: [
-        { name: 'Hits', value: stats.cacheHits },
-        { name: 'Misses', value: stats.cacheMisses },
-      ],
       io: [
-        { name: 'Reads', value: stats.readOperations },
-        { name: 'Writes', value: stats.writeOperations },
+        { name: 'Disk reads', value: stats.readOperations },
+        { name: 'Disk writes', value: stats.writeOperations },
       ],
+      // Order matches the validated palette adjacency (blue, orange, aqua, yellow).
       pages: [
-        { name: 'Metadata', value: stats.metadataPages },
-        { name: 'Internal', value: stats.internalPages },
         { name: 'Leaf', value: stats.leafPages },
+        { name: 'Internal', value: stats.internalPages },
+        { name: 'Metadata', value: stats.metadataPages },
         { name: 'Overflow', value: stats.overflowPages },
       ],
     };
@@ -65,69 +81,77 @@ export function MetricsPage({ refreshToken }: MetricsPageProps) {
 
   return (
     <div className="grid gap-6 xl:grid-cols-2">
-      <Panel title="Cache Hit Ratio" eyebrow={formatPercent(stats.cacheHitRate)}>
-        <div className="h-80">
-          <ResponsiveContainer>
-            <PieChart>
-              <Pie data={charts.cache} dataKey="value" nameKey="name" innerRadius={70} outerRadius={110} paddingAngle={3}>
-                {charts.cache.map((entry, index) => (
-                  <Cell key={entry.name} fill={chartColors[index]} />
-                ))}
-              </Pie>
-              <Tooltip contentStyle={{ background: '#10141d', border: '1px solid #263244', borderRadius: 8, color: '#e2e8f0' }} />
-            </PieChart>
-          </ResponsiveContainer>
+      <Panel
+        title="Buffer pool cache"
+        description="How often a page the engine needed was already in memory. High is good — a miss means a disk read."
+      >
+        <div className="grid h-80 content-center gap-6">
+          <div>
+            <p className="text-sm text-ink2">Cache hit rate</p>
+            <p className="mt-1 text-5xl font-semibold text-ink">{formatPercent(stats.cacheHitRate)}</p>
+          </div>
+          <Meter
+            ratio={stats.cacheHitRate}
+            label={`${formatNumber(stats.cacheHits)} hits · ${formatNumber(stats.cacheMisses)} misses`}
+          />
+          <Meter
+            ratio={stats.bufferCapacity > 0 ? stats.bufferResidentPages / stats.bufferCapacity : 0}
+            label={`${stats.bufferResidentPages} of ${stats.bufferCapacity} cache slots holding a page`}
+          />
         </div>
       </Panel>
 
-      <Panel title="Reads vs Writes" eyebrow="Page IO">
+      <Panel title="Disk traffic" description="Actual page reads and writes that reached the file — everything the cache absorbed isn't here.">
         <div className="h-80">
           <ResponsiveContainer>
-            <BarChart data={charts.io}>
-              <CartesianGrid stroke="#263244" vertical={false} />
-              <XAxis dataKey="name" stroke="#94a3b8" />
-              <YAxis stroke="#94a3b8" />
-              <Tooltip contentStyle={{ background: '#10141d', border: '1px solid #263244', borderRadius: 8, color: '#e2e8f0' }} />
-              <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-                {charts.io.map((entry, index) => (
-                  <Cell key={entry.name} fill={chartColors[index]} />
-                ))}
+            <BarChart data={charts.io} margin={{ top: 24, right: 8, left: 8, bottom: 0 }}>
+              <CartesianGrid stroke="#e1e0d9" vertical={false} />
+              <XAxis dataKey="name" stroke="#898781" tickLine={false} axisLine={{ stroke: '#c3c2b7' }} />
+              <YAxis stroke="#898781" tickLine={false} axisLine={false} />
+              <Tooltip cursor={{ fill: 'rgba(11,11,11,0.04)' }} contentStyle={tooltipStyle} />
+              <Bar dataKey="value" fill="#2a78d6" maxBarSize={24} radius={[4, 4, 0, 0]}>
+                <LabelList dataKey="value" position="top" formatter={(value: number) => formatNumber(value)} fill="#52514e" fontSize={12} />
               </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
       </Panel>
 
-      <Panel title="Page Allocation" eyebrow={`${formatNumber(stats.pageCount)} pages`}>
+      <Panel
+        title="Pages by role"
+        description="Every 4 KB page in the file plays one role. Colors match the tree visualizer: blue leaves hold data, orange internals route lookups."
+      >
         <div className="h-80">
           <ResponsiveContainer>
-            <BarChart data={charts.pages}>
-              <CartesianGrid stroke="#263244" vertical={false} />
-              <XAxis dataKey="name" stroke="#94a3b8" />
-              <YAxis stroke="#94a3b8" allowDecimals={false} />
-              <Tooltip contentStyle={{ background: '#10141d', border: '1px solid #263244', borderRadius: 8, color: '#e2e8f0' }} />
-              <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-                {charts.pages.map((entry, index) => (
-                  <Cell key={entry.name} fill={chartColors[index]} />
+            <BarChart data={charts.pages} margin={{ top: 24, right: 8, left: 8, bottom: 0 }}>
+              <CartesianGrid stroke="#e1e0d9" vertical={false} />
+              <XAxis dataKey="name" stroke="#898781" tickLine={false} axisLine={{ stroke: '#c3c2b7' }} />
+              <YAxis stroke="#898781" tickLine={false} axisLine={false} allowDecimals={false} />
+              <Tooltip cursor={{ fill: 'rgba(11,11,11,0.04)' }} contentStyle={tooltipStyle} />
+              <Bar dataKey="value" maxBarSize={24} radius={[4, 4, 0, 0]}>
+                {charts.pages.map((entry) => (
+                  <Cell key={entry.name} fill={pageTypeColors[entry.name]} />
                 ))}
+                <LabelList dataKey="value" position="top" formatter={(value: number) => formatNumber(value)} fill="#52514e" fontSize={12} />
               </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
       </Panel>
 
-      <Panel title="Indexed Records" eyebrow={`${formatBytes(stats.databaseSizeBytes)} file`}>
-        <div className="grid h-80 content-center gap-4">
-          <div className="rounded-md border border-line bg-ink/50 p-4">
-            <p className="text-sm text-slate-500">Records</p>
-            <p className="mt-2 text-4xl font-semibold text-slate-50">{formatNumber(stats.totalRecords)}</p>
+      <Panel title="Storage" description="How full the file is, and how tightly the tree is packing its pages.">
+        <div className="grid h-80 content-center gap-6">
+          <div>
+            <p className="text-sm text-ink2">Database file</p>
+            <p className="mt-1 text-4xl font-semibold text-ink">{formatBytes(stats.databaseSizeBytes)}</p>
+            <p className="mt-1 text-sm text-muted">
+              {formatNumber(stats.totalRecords)} records across {formatNumber(stats.pageCount)} pages
+            </p>
           </div>
-          <div className="rounded-md border border-line bg-ink/50 p-4">
-            <p className="text-sm text-slate-500">Tree page utilization</p>
-            <div className="mt-3 h-3 overflow-hidden rounded-full bg-slate-800">
-              <div className="h-full rounded-full bg-mint" style={{ width: `${Math.min(100, stats.pageUtilization * 100)}%` }} />
-            </div>
-          </div>
+          <Meter
+            ratio={stats.pageUtilization}
+            label={`${formatPercent(stats.pageUtilization)} of tree-page space in use (${formatBytes(stats.treeUsedBytes)} of ${formatBytes(stats.treeAllocatedBytes)})`}
+          />
         </div>
       </Panel>
     </div>

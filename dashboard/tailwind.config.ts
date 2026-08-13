@@ -1,7 +1,6 @@
 import type { Config } from 'tailwindcss';
 
 export default {
-  darkMode: 'class',
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
     extend: {
@@ -10,16 +9,27 @@ export default {
         mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'monospace'],
       },
       colors: {
-        ink: '#080a0f',
-        panel: '#10141d',
-        panel2: '#151b26',
-        line: '#263244',
-        mint: '#2dd4bf',
-        skyline: '#38bdf8',
-        amberline: '#f59e0b',
+        // surfaces
+        paper: '#f9f9f7', // page background
+        surface: '#fcfcfb', // cards / panels
+        line: '#e1e0d9', // hairline borders
+        baseline: '#c3c2b7', // axis / stronger rules
+        // ink
+        ink: '#0b0b0b',
+        ink2: '#52514e',
+        muted: '#898781',
+        // data colors (validated palette — see docs)
+        leaf: '#2a78d6', // blue: leaf pages, primary actions
+        internal: '#eb6834', // orange: internal pages
+        meta: '#1baf7a', // aqua: metadata pages
+        overflow: '#eda100', // yellow: overflow pages
+        path: '#4a3aa7', // violet: highlighted search path
+        // status (reserved)
+        good: '#0ca30c',
+        danger: '#d03b3b',
       },
       boxShadow: {
-        panel: '0 18px 50px rgba(0, 0, 0, 0.24)',
+        card: '0 1px 2px rgba(11, 11, 11, 0.04), 0 8px 24px rgba(11, 11, 11, 0.05)',
       },
     },
   },
