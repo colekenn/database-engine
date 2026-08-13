@@ -4,9 +4,13 @@ import { api } from '../api/client';
 import type { TreeNode, TreeSnapshot } from '../types';
 import { formatBytes } from '../lib/format';
 
+import { Button } from './Button';
+
 type TreeViewProps = {
   refreshToken: number;
   tracedKey: string | null;
+  onSeed: () => void;
+  seeding: boolean;
 };
 
 type FlowData = {
@@ -116,7 +120,7 @@ function buildFlow(snapshot: TreeSnapshot): { nodes: Node<FlowData>[]; edges: Ed
   return { nodes, edges };
 }
 
-export function TreeView({ refreshToken, tracedKey }: TreeViewProps) {
+export function TreeView({ refreshToken, tracedKey, onSeed, seeding }: TreeViewProps) {
   const [tree, setTree] = useState<TreeSnapshot | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -157,11 +161,17 @@ export function TreeView({ refreshToken, tracedKey }: TreeViewProps) {
 
       {error ? (
         <div className="grid place-items-center rounded-md border border-line bg-surface text-sm text-danger">{error}</div>
-      ) : !tree || tree.nodes.length === 0 ? (
+      ) : !tree || tree.nodes.every((node) => node.keys.length === 0) ? (
         <div className="grid place-items-center rounded-md border border-dashed border-baseline bg-surface text-center">
-          <p className="max-w-sm p-6 text-sm text-ink2">
-            empty tree — insert a key or load the sample data to see pages appear and split
-          </p>
+          <div className="p-6">
+            <p className="text-sm font-medium text-ink">the database is empty</p>
+            <p className="mx-auto mt-1 max-w-sm text-sm text-ink2">
+              load some sample data and watch the tree build itself — pages fill up, split, and grow a new level
+            </p>
+            <Button variant="primary" className="mt-4" onClick={onSeed} disabled={seeding}>
+              {seeding ? 'inserting 260 records…' : 'load sample data'}
+            </Button>
+          </div>
         </div>
       ) : (
         <div className="overflow-hidden rounded-md border border-line bg-surface">

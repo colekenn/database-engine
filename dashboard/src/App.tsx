@@ -103,7 +103,8 @@ export function App() {
           <div>
             <h1 className="text-lg font-semibold">B+ tree database engine</h1>
             <p className="mt-0.5 text-sm text-ink2">
-              a disk-backed key-value store written from scratch in C++ — this page is a live view of its pages on disk
+              a key-value database written from scratch in C++ — page-based storage, buffer pool caching, and a persistent B+ tree
+              index, visualized live below
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
@@ -125,7 +126,7 @@ export function App() {
         <StatsBar stats={stats} />
         <div className="grid gap-4 lg:grid-cols-[340px_1fr]">
           <Operations onChanged={refresh} onTrace={setTracedKey} />
-          <TreeView refreshToken={refreshToken} tracedKey={tracedKey} />
+          <TreeView refreshToken={refreshToken} tracedKey={tracedKey} onSeed={() => void seed()} seeding={seeding} />
         </div>
       </main>
     </div>

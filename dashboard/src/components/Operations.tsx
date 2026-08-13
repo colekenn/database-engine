@@ -18,6 +18,7 @@ export function Operations({ onChanged, onTrace }: OperationsProps) {
   const [rangeStart, setRangeStart] = useState('');
   const [rangeEnd, setRangeEnd] = useState('');
   const [response, setResponse] = useState<string | null>(null);
+  const [tookMs, setTookMs] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [rangeRecords, setRangeRecords] = useState<ApiRecord[] | null>(null);
   const [busy, setBusy] = useState(false);
@@ -25,8 +26,10 @@ export function Operations({ onChanged, onTrace }: OperationsProps) {
   async function run(task: () => Promise<unknown>, options?: { changed?: boolean }) {
     setBusy(true);
     setError(null);
+    const startedAt = performance.now();
     try {
       const result = await task();
+      setTookMs(Math.max(1, Math.round(performance.now() - startedAt)));
       setResponse(JSON.stringify(result, null, 2));
       if (options?.changed) onChanged();
     } catch (err) {
@@ -52,6 +55,19 @@ export function Operations({ onChanged, onTrace }: OperationsProps) {
     void run(() => api.deleteRecord(lookupKey.trim()), { changed: true });
   }
 
+  // Pick a real key at random and look it up — zero-typing way to see a
+  // lookup walk the tree.
+  function traceRandom() {
+    void run(async () => {
+      const { records } = await api.range('', '', 200);
+      if (records.length === 0) throw new Error('no records yet — load the sample data first');
+      const key = records[Math.floor(Math.random() * records.length)].key;
+      setLookupKey(key);
+      onTrace(key);
+      return api.getRecord(key);
+    });
+  }
+
   function submitRange(event: FormEvent) {
     event.preventDefault();
     void run(async () => {
@@ -66,8 +82,14 @@ export function Operations({ onChanged, onTrace }: OperationsProps) {
       <section className="rounded-md border border-line bg-surface p-4">
         <h2 className="text-sm font-semibold text-ink">insert</h2>
         <form className="mt-3 grid gap-3" onSubmit={submitInsert}>
-          <Field label="key" value={insertKey} onChange={(event) => setInsertKey(event.target.value)} required />
-          <TextArea label="value" className="min-h-16" value={insertValue} onChange={(event) => setInsertValue(event.target.value)} />
+          <Field label="key" placeholder="anything — try your name" value={insertKey} onChange={(event) => setInsertKey(event.target.value)} required />
+          <TextArea
+            label="value"
+            className="min-h-16"
+            placeholder="anything else"
+            value={insertValue}
+            onChange={(event) => setInsertValue(event.target.value)}
+          />
           <Button variant="primary" disabled={busy}>
             insert
           </Button>
@@ -78,7 +100,7 @@ export function Operations({ onChanged, onTrace }: OperationsProps) {
         <h2 className="text-sm font-semibold text-ink">get / delete</h2>
         <p className="mt-1 text-xs text-muted">get also highlights the lookup path in the tree</p>
         <form className="mt-3 grid gap-3" onSubmit={submitGet}>
-          <Field label="key" value={lookupKey} onChange={(event) => setLookupKey(event.target.value)} required />
+          <Field label="key" placeholder="e.g. user:0142" value={lookupKey} onChange={(event) => setLookupKey(event.target.value)} required />
           <div className="flex gap-2">
             <Button variant="secondary" disabled={busy} className="flex-1">
               get
@@ -87,6 +109,9 @@ export function Operations({ onChanged, onTrace }: OperationsProps) {
               delete
             </Button>
           </div>
+          <Button variant="ghost" type="button" disabled={busy} onClick={traceRandom}>
+            or trace a random key
+          </Button>
         </form>
       </section>
 
@@ -126,7 +151,10 @@ export function Operations({ onChanged, onTrace }: OperationsProps) {
 
       {response ? (
         <section className="rounded-md border border-line bg-surface p-4">
-          <h2 className="text-sm font-semibold text-ink">last response</h2>
+          <h2 className="flex items-baseline justify-between text-sm font-semibold text-ink">
+            last response
+            {tookMs !== null ? <span className="font-mono text-xs font-normal text-muted">{tookMs} ms round trip</span> : null}
+          </h2>
           <pre className="mt-2 max-h-40 overflow-auto rounded border border-line bg-paper p-3 font-mono text-xs leading-5 text-ink2">{response}</pre>
         </section>
       ) : null}
