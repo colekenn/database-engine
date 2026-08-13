@@ -1,32 +1,18 @@
 # database-engine
 
-This database engine stores key-value pairs on disk using a B+ tree, which means range scans are fast because the leaf nodes are linked together. Reads and writes go through a buffer pool that keeps hot pages in memory so you're not hitting disk constantly.
+A small database written from scratch in C++. It stores key-value pairs in a single file and uses a B+ tree to find any key fast without scanning the whole file.
 
-## what's in here
+There's a web dashboard that shows the tree live — you can insert keys and watch pages fill up and split.
 
-The core is written in C++. The main pieces are:
+## the parts
 
-- **B+ tree** — the index structure. handles inserts, lookups, deletes, and range scans
-- **Buffer pool** — LRU page cache that sits between the tree and disk. tracks hit/miss stats
-- **Page manager** — handles reading and writing fixed-size pages to the database file
-- **Overflow manager** — deals with values that are too large to fit in a single page
-- **HTTP API** — a small REST server so you can talk to the database over HTTP
-
-There's also a web dashboard built with React/Vite that lets you interact with the database and visualize the B+ tree structure as you insert and delete keys. That part was mostly for making the internals less abstract to look at.
-
-## running it
-
-```bash
-cmake -B build && cmake --build build
-./build/minidb_server
-```
-
-The dashboard runs separately:
-
-```bash
-cd dashboard && npm install && npm run dev
-```
+- **B+ tree** — keeps keys sorted and finds any one of them in a couple of page reads
+- **Buffer pool** — keeps recently used pages in memory so most reads never touch the disk
+- **Page manager** — reads and writes the file in fixed 4 KB pages
+- **Overflow pages** — for values too big to fit in one page
+- **REST API** — a small HTTP server so the dashboard can talk to the engine
+- **Dashboard** — React app that visualizes the tree and the engine's stats
 
 ## why
- 
-I wanted to understand buffer pools, page-based storage, and tree rebalancing at a level where I actually had to implement them. Reading about it only goes so far.
+
+I wanted to understand how databases actually store things — buffer pools, pages, tree splits — and reading about it only goes so far, so I built one.
